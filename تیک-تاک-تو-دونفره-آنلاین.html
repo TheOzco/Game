@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تیک‌تاک‌توی دونفره آنلاین</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.3.2/peerjs.min.js"></script>
+<style>
+  :root{
+    --board:#16302A;
+    --board-dark:#0F231E;
+    --plate:#F3E9D2;
+    --plate-shadow:#d9cba3;
+    --brass:#C9A227;
+    --p1:#C1440E;
+    --p2:#2B4570;
+    --chalk:#F5F1E6;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:radial-gradient(ellipse at top, #1c3a32 0%, var(--board) 45%, var(--board-dark) 100%);
+    font-family:'Vazirmatn', sans-serif;
+    color:var(--chalk);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:24px 12px 60px;
+  }
+  h1{
+    font-weight:900;
+    font-size:clamp(22px,4vw,32px);
+    margin:6px 0 2px;
+    color:var(--brass);
+    text-shadow:0 2px 0 rgba(0,0,0,.3);
+  }
+  .subtitle{ color:#cdd8d1; font-size:14px; margin-bottom:22px; opacity:.85; text-align:center; max-width:480px;}
+
+  .card{
+    background:var(--plate);
+    color:var(--board-dark);
+    border-radius:16px;
+    padding:28px;
+    width:100%;
+    max-width:420px;
+    box-shadow:0 14px 40px rgba(0,0,0,.4);
+  }
+  .card p{ margin:0 0 16px; font-size:13.5px; color:#5b5347; line-height:1.9;}
+  .tabbar{ display:flex; gap:8px; margin-bottom:20px; }
+  .tabbar button{
+    flex:1; padding:9px 0; border:none; border-radius:999px;
+    background:rgba(0,0,0,.08); color:var(--board-dark); font-family:inherit;
+    font-weight:700; font-size:13.5px; cursor:pointer;
+  }
+  .tabbar button.active{ background:var(--brass); color:#fff; }
+  .field{
+    width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid #d9cba3;
+    font-family:inherit; font-size:15px; margin-bottom:12px; background:#fffdf6;
+    text-align:center; letter-spacing:1px;
+  }
+  .primary-btn{
+    width:100%; padding:12px 0; border:none; border-radius:10px;
+    background:var(--board); color:var(--chalk); font-family:inherit;
+    font-weight:700; font-size:15px; cursor:pointer;
+  }
+  .primary-btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .share-box{
+    background:#fffdf6; border:1.5px dashed #c9a227; border-radius:10px;
+    padding:14px; margin-bottom:14px; word-break:break-all; font-size:13px;
+  }
+  .copy-btn{
+    margin-top:8px; padding:8px 14px; border:none; border-radius:8px;
+    background:var(--brass); color:#fff; font-family:inherit; font-weight:700;
+    font-size:13px; cursor:pointer;
+  }
+  .waiting-line{ display:flex; align-items:center; gap:8px; font-size:13.5px; color:#5b5347; }
+  .spinner{
+    width:14px;height:14px;border-radius:50%;
+    border:2px solid #d9cba3; border-top-color:var(--brass);
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .error-text{ color:#a33; font-size:13px; margin-top:-4px; margin-bottom:10px; min-height:16px; }
+
+  #gameScreen{ display:none; flex-direction:column; align-items:center; width:100%; }
+  .status{
+    display:flex; align-items:center; gap:14px;
+    background:rgba(0,0,0,.25); border:1px solid rgba(201,162,39,.35);
+    padding:10px 22px; border-radius:999px; margin-bottom:8px; font-weight:600;
+  }
+  .status .dot{ width:12px;height:12px;border-radius:50%; box-shadow:0 0 8px currentColor; }
+  .turn-p1 .dot{background:var(--p1);color:var(--p1);}
+  .turn-p2 .dot{background:var(--p2);color:var(--p2);}
+  .me-tag{ font-size:12px; color:#9fb0a8; margin-bottom:10px; }
+
+  .scoreboard{ display:flex; gap:10px; margin-bottom:22px; }
+  .score-chip{
+    display:flex; align-items:center; gap:8px;
+    background:rgba(0,0,0,.25); border-radius:12px; padding:8px 14px;
+  }
+  .score-chip .label{ font-size:12.5px; font-weight:700; }
+  .score-chip.p1 .label{ color:var(--p1); }
+  .score-chip.p2 .label{ color:var(--p2); }
+  .score-chip .num{ font-size:16px; font-weight:900; color:var(--brass); }
+  .score-chip.me{ box-shadow:0 0 0 2px var(--brass) inset; }
+
+  .ttt-board{
+    background:var(--plate);
+    box-shadow:0 10px 0 var(--plate-shadow), 0 14px 24px rgba(0,0,0,.45);
+    border-radius:14px;
+    padding:14px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    width:min(320px, 82vw);
+  }
+  .ttt-cell{
+    position:relative;
+    aspect-ratio:1/1;
+    background:#fffdf6;
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:clamp(28px, 9vw, 44px);
+    font-weight:900;
+    user-select:none;
+  }
+  .ttt-cell.x{ color:var(--p1); }
+  .ttt-cell.o{ color:var(--p2); }
+  .ttt-cell.clickable{ cursor:pointer; transition:transform .12s, background .12s; }
+  .ttt-cell.clickable:hover{ transform:translateY(-2px); background:#ffe9b0; }
+  .ttt-cell.win{ background:linear-gradient(135deg,#ffe9b0,#fff3d6); }
+  .ttt-cell .mark{ animation:pop .22s ease-out; }
+  @keyframes pop{ from{ transform:scale(.3); opacity:0; } }
+
+  .opp-note{ margin-top:16px; font-size:13px; color:#9fb0a8; text-align:center; max-width:280px; }
+  .conn-note{ margin-top:6px; font-size:12px; color:#e0b0a0; text-align:center; }
+
+  .controls{ margin-top:24px; display:flex; gap:12px; }
+  .btn{
+    padding:10px 22px; border-radius:999px; border:1px solid var(--brass);
+    background:transparent; color:var(--brass); font-family:inherit;
+    font-weight:700; font-size:14px; cursor:pointer; transition:background .15s, color .15s;
+  }
+  .btn:hover{ background:var(--brass); color:var(--board-dark); }
+
+  .overlay{ position:fixed; inset:0; background:rgba(10,20,17,.85); display:none; align-items:center; justify-content:center; z-index:10; backdrop-filter:blur(2px); }
+  .overlay.show{ display:flex; }
+  .win-card{ background:var(--plate); color:var(--board-dark); padding:36px 48px; border-radius:16px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.5); max-width:90vw; }
+  .win-card h2{ margin:0 0 8px; font-size:26px; }
+  .win-card p{ margin:0 0 20px; color:#5b5347; }
+</style>
+</head>
+<body>
+
+  <h1>⭕ تیک‌تاک‌توی دونفره آنلاین</h1>
+  <div class="subtitle">هر بازیکن روی گوشی خودش بازی می‌کنه — اتصال مستقیم بین دو گوشیه، بدون سرور واسط</div>
+
+  <div class="card" id="lobbyCard">
+    <div class="tabbar">
+      <button id="tabHost" class="active">ساخت بازی جدید</button>
+      <button id="tabJoin">پیوستن به بازی</button>
+    </div>
+
+    <div id="hostPane">
+      <p>یه اتاق بساز و لینکش رو برای حریفت بفرست. تو X هستی و اول تو بازی می‌کنی.</p>
+      <button class="primary-btn" id="createBtn">ساخت بازی</button>
+      <div id="hostWaiting" style="display:none; margin-top:16px;">
+        <div class="share-box" id="shareLink"></div>
+        <button class="copy-btn" id="copyBtn">کپی لینک</button>
+        <div style="height:14px;"></div>
+        <div class="waiting-line"><span class="spinner"></span> منتظر پیوستن حریف...</div>
+      </div>
+      <div class="error-text" id="hostError"></div>
+    </div>
+
+    <div id="joinPane" style="display:none;">
+      <p>کد یا لینکی که حریفت فرستاده رو اینجا بچسبون. تو O هستی.</p>
+      <input class="field" id="joinInput" placeholder="کد اتاق یا لینک">
+      <div class="error-text" id="joinError"></div>
+      <button class="primary-btn" id="joinBtn">پیوستن</button>
+    </div>
+  </div>
+
+  <div id="gameScreen">
+    <div class="status" id="statusBar">
+      <span class="dot"></span>
+      <span id="statusText">در حال بارگذاری...</span>
+    </div>
+    <div class="me-tag" id="meTag"></div>
+
+    <div class="scoreboard" id="scoreboard"></div>
+
+    <div class="ttt-board" id="board"></div>
+
+    <div class="opp-note" id="oppNote"></div>
+    <div class="conn-note" id="connNote"></div>
+
+    <div class="controls">
+      <button class="btn" id="rematchBtn" style="display:none;">دور بعدی</button>
+      <button class="btn" id="restartBtn">بازی جدید</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="win-card">
+      <h2 id="winTitle">🎉 بازیکن ۱ برنده شد!</h2>
+      <p id="winSub">با سه‌تا پشت‌سرهم، این دور رو برد.</p>
+      <button class="btn" id="playAgainBtn">دور بعدی</button>
+    </div>
+  </div>
+
+<script>
+let peer = null;
+let conn = null;
+let myRole = null; // 1 = host (X), 2 = guest (O)
+let state = null;
+
+const WIN_LINES = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+function freshRound(starter){
+  return {
+    board: Array(9).fill(null),
+    turn: starter,
+    gameOver: false,
+    winner: null,      // 1, 2, or 'draw'
+    winLine: null
+  };
+}
+function freshState(){
+  return {
+    round: freshRound(1),
+    score1: 0,
+    score2: 0,
+    starter: 1
+  };
+}
+
+/* ---------- Lobby tabs ---------- */
+const tabHost = document.getElementById('tabHost');
+const tabJoin = document.getElementById('tabJoin');
+const hostPane = document.getElementById('hostPane');
+const joinPane = document.getElementById('joinPane');
+tabHost.onclick = () => { tabHost.classList.add('active'); tabJoin.classList.remove('active'); hostPane.style.display='block'; joinPane.style.display='none'; };
+tabJoin.onclick = () => { tabJoin.classList.add('active'); tabHost.classList.remove('active'); joinPane.style.display='block'; hostPane.style.display='none'; };
+
+/* ---------- Hosting ---------- */
+document.getElementById('createBtn').onclick = () => {
+  const btn = document.getElementById('createBtn');
+  const errEl = document.getElementById('hostError');
+  errEl.textContent = '';
+  btn.disabled = true; btn.textContent = 'در حال ساخت...';
+
+  peer = new Peer();
+
+  peer.on('open', id => {
+    const link = location.origin + location.pathname + '?peer=' + id;
+    document.getElementById('shareLink').textContent = link;
+    document.getElementById('hostWaiting').style.display = 'block';
+    btn.style.display = 'none';
+  });
+
+  peer.on('connection', c => {
+    conn = c;
+    myRole = 1;
+    wireConnection();
+    conn.on('open', () => {
+      state = freshState();
+      conn.send({ type:'init', state });
+      startGame();
+    });
+  });
+
+  peer.on('error', err => {
+    errEl.textContent = 'اتصال ممکن نشد (' + err.type + '). دوباره امتحان کن.';
+    btn.disabled = false; btn.textContent = 'ساخت بازی';
+  });
+};
+
+document.getElementById('copyBtn').onclick = () => {
+  const text = document.getElementById('shareLink').textContent;
+  navigator.clipboard?.writeText(text);
+  const b = document.getElementById('copyBtn');
+  b.textContent = 'کپی شد ✓';
+  setTimeout(()=> b.textContent = 'کپی لینک', 1500);
+};
+
+/* ---------- Joining ---------- */
+function extractPeerId(raw){
+  const m = raw.match(/peer=([^&]+)/);
+  return m ? m[1] : raw.trim();
+}
+
+function joinRoom(hostId){
+  const errEl = document.getElementById('joinError') || document.getElementById('hostError');
+  peer = new Peer();
+  peer.on('open', () => {
+    conn = peer.connect(hostId, { reliable:true });
+    myRole = 2;
+    wireConnection();
+    conn.on('open', () => {
+      document.getElementById('lobbyCard').innerHTML = '<div class="waiting-line"><span class="spinner"></span> در حال دریافت بازی...</div>';
+    });
+  });
+  peer.on('error', err => {
+    if(errEl) errEl.textContent = 'وصل نشد (' + err.type + '). لینک یا کد رو چک کن.';
+    document.getElementById('joinBtn').disabled = false;
+    document.getElementById('joinBtn').textContent = 'پیوستن';
+  });
+}
+
+document.getElementById('joinBtn').onclick = () => {
+  const raw = document.getElementById('joinInput').value.trim();
+  const errEl = document.getElementById('joinError');
+  errEl.textContent = '';
+  if(!raw){ errEl.textContent = 'یه کد یا لینک وارد کن.'; return; }
+  document.getElementById('joinBtn').disabled = true;
+  document.getElementById('joinBtn').textContent = 'در حال اتصال...';
+  joinRoom(extractPeerId(raw));
+};
+
+/* ---------- Auto-join from URL ---------- */
+(function autoJoinFromUrl(){
+  const params = new URLSearchParams(location.search);
+  const hostId = params.get('peer');
+  if(hostId){
+    document.getElementById('lobbyCard').innerHTML = '<div class="waiting-line"><span class="spinner"></span> در حال اتصال به بازی...</div>';
+    joinRoom(hostId);
+  }
+})();
+
+/* ---------- Shared connection wiring ---------- */
+function wireConnection(){
+  conn.on('data', handleData);
+  conn.on('close', () => {
+    document.getElementById('connNote').textContent = '⚠️ ارتباط با حریف قطع شد.';
+  });
+  conn.on('error', () => {
+    document.getElementById('connNote').textContent = '⚠️ مشکلی تو ارتباط پیش اومد.';
+  });
+}
+
+function handleData(data){
+  if(data.type === 'init'){
+    state = data.state;
+    startGame();
+  } else if(data.type === 'move'){
+    if(state && !state.round.gameOver && state.round.board[data.index] === null){
+      applyMove(data.index);
+      render();
+    }
+  } else if(data.type === 'rematch'){
+    if(state){
+      state.starter = state.starter === 1 ? 2 : 1;
+      state.round = freshRound(state.starter);
+      render();
+    }
+  }
+}
+
+/* ---------- Game ---------- */
+function startGame(){
+  document.getElementById('lobbyCard').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'flex';
+  document.getElementById('meTag').textContent = 'تو بازیکن ' + (myRole===1?'۱ (X)':'۲ (O)') + ' هستی';
+  document.getElementById('oppNote').textContent = 'حریفت روی گوشی خودش همین صفحه رو می‌بینه.';
+  render();
+}
+
+function render(){
+  if(!state) return;
+  renderBoard();
+  renderScoreboard();
+  renderStatus();
+  const r = state.round;
+  const rematchBtn = document.getElementById('rematchBtn');
+  if(r.gameOver){
+    rematchBtn.style.display = 'inline-block';
+    let title, sub;
+    if(r.winner === 'draw'){
+      title = '🤝 مساوی شد!';
+      sub = 'هیچ‌کس این دور رو نبرد.';
+    } else {
+      title = '🎉 بازیکن ' + (r.winner===1?'۱ (X)':'۲ (O)') + ' برنده شد!' + (r.winner===myRole ? ' (خودت!)' : '');
+      sub = 'سه‌تا پشت‌سرهم رد کرد.';
+    }
+    document.getElementById('winTitle').textContent = title;
+    document.getElementById('winSub').textContent = sub;
+    document.getElementById('overlay').classList.add('show');
+  } else {
+    rematchBtn.style.display = 'none';
+    document.getElementById('overlay').classList.remove('show');
+  }
+}
+
+function renderBoard(){
+  const el = document.getElementById('board');
+  el.innerHTML = '';
+  const r = state.round;
+  const myTurn = r.turn === myRole && !r.gameOver;
+  const winSet = new Set(r.winLine || []);
+  r.board.forEach((val, idx) => {
+    const cell = document.createElement('div');
+    const canClick = myTurn && val === null;
+    cell.className = 'ttt-cell'
+      + (val === 1 ? ' x' : val === 2 ? ' o' : '')
+      + (canClick ? ' clickable' : '')
+      + (winSet.has(idx) ? ' win' : '');
+    if(val !== null){
+      const mark = document.createElement('span');
+      mark.className = 'mark';
+      mark.textContent = val === 1 ? '✕' : '○';
+      cell.appendChild(mark);
+    }
+    if(canClick){
+      cell.onclick = () => makeMove(idx);
+    }
+    el.appendChild(cell);
+  });
+}
+
+function renderScoreboard(){
+  const el = document.getElementById('scoreboard');
+  el.innerHTML = '';
+  [1,2].forEach(role => {
+    const chip = document.createElement('div');
+    chip.className = 'score-chip ' + (role===1?'p1':'p2') + (role===myRole?' me':'');
+    const label = document.createElement('span');
+    label.className = 'label';
+    label.textContent = 'بازیکن ' + (role===1?'۱ (X)':'۲ (O)') + (role===myRole?' (تو)':'');
+    const num = document.createElement('span');
+    num.className = 'num';
+    num.textContent = role===1 ? state.score1 : state.score2;
+    chip.appendChild(label);
+    chip.appendChild(num);
+    el.appendChild(chip);
+  });
+}
+
+function renderStatus(){
+  const bar = document.getElementById('statusBar');
+  const text = document.getElementById('statusText');
+  const r = state.round;
+  bar.className = 'status ' + (r.turn===1 ? 'turn-p1' : 'turn-p2');
+  if(r.gameOver){
+    text.textContent = 'این دور تمام شد';
+  } else if(r.turn === myRole){
+    text.textContent = 'نوبت توئه! یه خونه رو لمس کن';
+  } else {
+    text.textContent = 'منتظر بازیکن ' + (r.turn===1?'۱':'۲') + '...';
+  }
+}
+
+function checkWinner(board){
+  for(const line of WIN_LINES){
+    const [a,b,c] = line;
+    if(board[a] !== null && board[a] === board[b] && board[b] === board[c]){
+      return { winner: board[a], line };
+    }
+  }
+  if(board.every(v => v !== null)) return { winner: 'draw', line: null };
+  return null;
+}
+
+function applyMove(index){
+  const r = state.round;
+  r.board[index] = r.turn;
+  const result = checkWinner(r.board);
+  if(result){
+    r.gameOver = true;
+    r.winner = result.winner;
+    r.winLine = result.line;
+    if(result.winner === 1) state.score1++;
+    else if(result.winner === 2) state.score2++;
+  } else {
+    r.turn = r.turn === 1 ? 2 : 1;
+  }
+}
+
+function makeMove(index){
+  const r = state.round;
+  if(!state || r.gameOver || r.turn !== myRole) return;
+  if(r.board[index] !== null) return;
+  applyMove(index);
+  render();
+  conn.send({ type:'move', index });
+}
+
+function rematch(){
+  if(!state) return;
+  state.starter = state.starter === 1 ? 2 : 1;
+  state.round = freshRound(state.starter);
+  render();
+  conn.send({ type:'rematch' });
+}
+
+document.getElementById('rematchBtn').onclick = rematch;
+document.getElementById('playAgainBtn').onclick = rematch;
+document.getElementById('restartBtn').onclick = () => location.href = location.pathname;
+</script>
+</body>
+</html>
