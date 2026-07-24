@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>بینگوی دونفره آنلاین</title>
+<title>تیک‌تاک‌توی دونفره آنلاین</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.3.2/peerjs.min.js"></script>
@@ -94,51 +94,49 @@
   .status .dot{ width:12px;height:12px;border-radius:50%; box-shadow:0 0 8px currentColor; }
   .turn-p1 .dot{background:var(--p1);color:var(--p1);}
   .turn-p2 .dot{background:var(--p2);color:var(--p2);}
-  .me-tag{ font-size:12px; color:#9fb0a8; margin-bottom:18px; }
+  .me-tag{ font-size:12px; color:#9fb0a8; margin-bottom:10px; }
 
-  .player-tag{ font-weight:700; font-size:16px; margin-bottom:10px; padding:5px 16px; border-radius:8px; background:var(--plate); color:var(--board-dark); }
-  .player-tag.p1{ box-shadow:0 0 0 2px var(--p1) inset; }
-  .player-tag.p2{ box-shadow:0 0 0 2px var(--p2) inset; }
+  .scoreboard{ display:flex; gap:10px; margin-bottom:22px; }
+  .score-chip{
+    display:flex; align-items:center; gap:8px;
+    background:rgba(0,0,0,.25); border-radius:12px; padding:8px 14px;
+  }
+  .score-chip .label{ font-size:12.5px; font-weight:700; }
+  .score-chip.p1 .label{ color:var(--p1); }
+  .score-chip.p2 .label{ color:var(--p2); }
+  .score-chip .num{ font-size:16px; font-weight:900; color:var(--brass); }
+  .score-chip.me{ box-shadow:0 0 0 2px var(--brass) inset; }
 
-  .bingo-count{ display:flex; gap:6px; margin-bottom:10px; }
-  .bingo-count span{ width:14px;height:14px;border-radius:50%; border:2px solid var(--brass); }
-  .bingo-count span.filled.p1{ background:var(--p1); border-color:var(--p1); }
-  .bingo-count span.filled.p2{ background:var(--p2); border-color:var(--p2); }
-
-  .grid{
+  .ttt-board{
     background:var(--plate);
     box-shadow:0 10px 0 var(--plate-shadow), 0 14px 24px rgba(0,0,0,.45);
-    border-radius:10px; padding:10px;
-    display:grid; grid-template-columns:repeat(5,1fr); gap:6px;
+    border-radius:14px;
+    padding:14px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    width:min(320px, 82vw);
   }
-  .cell{
-    position:relative; width:52px;height:52px;
-    display:flex;align-items:center;justify-content:center;
-    font-weight:700; font-size:16px; color:var(--board-dark);
-    background:#fffdf6; border-radius:6px; user-select:none;
+  .ttt-cell{
+    position:relative;
+    aspect-ratio:1/1;
+    background:#fffdf6;
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:clamp(28px, 9vw, 44px);
+    font-weight:900;
+    user-select:none;
   }
-  .cell.marked{ color:#8a8375; }
-  .mark-p1, .mark-p2{
-    position:absolute; inset:2px; border-radius:50%;
-    border:3px solid var(--p1); transform:rotate(-8deg); animation:pop .25s ease-out;
-  }
-  .mark-p2{ border-color:var(--p2); transform:rotate(6deg); }
-  @keyframes pop{ from{ transform:scale(.4) rotate(0deg); opacity:0; } }
-  .cell.won-line{ background:linear-gradient(135deg,#ffe9b0,#fff3d6); }
+  .ttt-cell.x{ color:var(--p1); }
+  .ttt-cell.o{ color:var(--p2); }
+  .ttt-cell.clickable{ cursor:pointer; transition:transform .12s, background .12s; }
+  .ttt-cell.clickable:hover{ transform:translateY(-2px); background:#ffe9b0; }
+  .ttt-cell.win{ background:linear-gradient(135deg,#ffe9b0,#fff3d6); }
+  .ttt-cell .mark{ animation:pop .22s ease-out; }
+  @keyframes pop{ from{ transform:scale(.3); opacity:0; } }
 
-  .opp-note{ margin-top:10px; font-size:13px; color:#9fb0a8; text-align:center; max-width:280px; }
+  .opp-note{ margin-top:16px; font-size:13px; color:#9fb0a8; text-align:center; max-width:280px; }
   .conn-note{ margin-top:6px; font-size:12px; color:#e0b0a0; text-align:center; }
-
-  .caller{ margin-top:28px; width:100%; max-width:420px; background:rgba(0,0,0,.22); border:1px solid rgba(201,162,39,.3); border-radius:14px; padding:16px; }
-  .caller h3{ margin:0 0 10px; font-size:14px; color:var(--brass); font-weight:700; }
-  .numpad{ display:grid; grid-template-columns:repeat(auto-fill, minmax(48px,1fr)); gap:8px; }
-  .num-btn{
-    padding:10px 0; border-radius:8px; border:none; background:var(--chalk);
-    color:var(--board-dark); font-weight:700; font-size:15px; cursor:pointer;
-    transition:transform .12s, background .12s; font-family:inherit;
-  }
-  .num-btn:hover:not(:disabled){ transform:translateY(-2px); background:var(--brass); }
-  .num-btn:disabled{ background:rgba(255,255,255,.08); color:rgba(255,255,255,.25); cursor:not-allowed; }
 
   .controls{ margin-top:24px; display:flex; gap:12px; }
   .btn{
@@ -153,14 +151,12 @@
   .win-card{ background:var(--plate); color:var(--board-dark); padding:36px 48px; border-radius:16px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.5); max-width:90vw; }
   .win-card h2{ margin:0 0 8px; font-size:26px; }
   .win-card p{ margin:0 0 20px; color:#5b5347; }
-
-  @media (max-width:520px){ .cell{ width:15vw; height:15vw; font-size:3.6vw; } }
 </style>
 </head>
 <body>
 
-  <h1>🎯 بینگوی دونفره آنلاین</h1>
-  <div class="subtitle">هر بازیکن روی گوشی خودش بازی می‌کنه و فقط صفحه‌ی خودش رو می‌بینه — اتصال مستقیم بین دو گوشیه، بدون سرور واسط</div>
+  <h1>⭕ تیک‌تاک‌توی دونفره آنلاین</h1>
+  <div class="subtitle">هر بازیکن روی گوشی خودش بازی می‌کنه — اتصال مستقیم بین دو گوشیه، بدون سرور واسط</div>
 
   <div class="card" id="lobbyCard">
     <div class="tabbar">
@@ -169,7 +165,7 @@
     </div>
 
     <div id="hostPane">
-      <p>یه اتاق بساز و لینکش رو برای حریفت بفرست.</p>
+      <p>یه اتاق بساز و لینکش رو برای حریفت بفرست. تو X هستی و اول تو بازی می‌کنی.</p>
       <button class="primary-btn" id="createBtn">ساخت بازی</button>
       <div id="hostWaiting" style="display:none; margin-top:16px;">
         <div class="share-box" id="shareLink"></div>
@@ -181,7 +177,7 @@
     </div>
 
     <div id="joinPane" style="display:none;">
-      <p>کد یا لینکی که حریفت فرستاده رو اینجا بچسبون.</p>
+      <p>کد یا لینکی که حریفت فرستاده رو اینجا بچسبون. تو O هستی.</p>
       <input class="field" id="joinInput" placeholder="کد اتاق یا لینک">
       <div class="error-text" id="joinError"></div>
       <button class="primary-btn" id="joinBtn">پیوستن</button>
@@ -195,21 +191,15 @@
     </div>
     <div class="me-tag" id="meTag"></div>
 
-    <div class="board-wrap" id="myWrap">
-      <div class="player-tag" id="myTag">صفحه من</div>
-      <div class="bingo-count" id="myBingo"></div>
-      <div class="grid" id="myGrid"></div>
-    </div>
+    <div class="scoreboard" id="scoreboard"></div>
 
-    <div class="opp-note">صفحه‌ی حریف پیش خودشه؛ اینجا فقط تعداد بینگوهاش رو می‌بینی.</div>
+    <div class="ttt-board" id="board"></div>
+
+    <div class="opp-note" id="oppNote"></div>
     <div class="conn-note" id="connNote"></div>
 
-    <div class="caller">
-      <h3>یه عدد صدا بزن</h3>
-      <div class="numpad" id="numpad"></div>
-    </div>
-
     <div class="controls">
+      <button class="btn" id="rematchBtn" style="display:none;">دور بعدی</button>
       <button class="btn" id="restartBtn">بازی جدید</button>
     </div>
   </div>
@@ -217,51 +207,38 @@
   <div class="overlay" id="overlay">
     <div class="win-card">
       <h2 id="winTitle">🎉 بازیکن ۱ برنده شد!</h2>
-      <p>با ۳ بینگو، برنده این دوره شد.</p>
-      <button class="btn" id="playAgainBtn">بازی جدید بساز</button>
+      <p id="winSub">با سه‌تا پشت‌سرهم، این دور رو برد.</p>
+      <button class="btn" id="playAgainBtn">دور بعدی</button>
     </div>
   </div>
 
 <script>
-const WIN_TARGET = 3;
 let peer = null;
 let conn = null;
-let myRole = null; // 1 = host, 2 = guest
+let myRole = null; // 1 = host (X), 2 = guest (O)
 let state = null;
 
-function lineIndices(){
-  const lines = [];
-  for(let r=0;r<5;r++){ const l=[]; for(let c=0;c<5;c++) l.push(r*5+c); lines.push(l); }
-  for(let c=0;c<5;c++){ const l=[]; for(let r=0;r<5;r++) l.push(r*5+c); lines.push(l); }
-  lines.push([0,6,12,18,24]);
-  lines.push([4,8,12,16,20]);
-  return lines;
-}
-const LINES = lineIndices();
+const WIN_LINES = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
 
-function shuffle(a){
-  a = a.slice();
-  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
-  return a;
-}
-function genNumbers(){
-  const pool=[]; for(let i=10;i<=99;i++) pool.push(i);
-  return shuffle(pool).slice(0,25);
+function freshRound(starter){
+  return {
+    board: Array(9).fill(null),
+    turn: starter,
+    gameOver: false,
+    winner: null,      // 1, 2, or 'draw'
+    winLine: null
+  };
 }
 function freshState(){
-  const numbers = genNumbers();
   return {
-    numbers,
-    arr1: shuffle(numbers),
-    arr2: shuffle(numbers),
-    marked: [],
-    awarded1: [],
-    awarded2: [],
-    bingo1: 0,
-    bingo2: 0,
-    turn: 1,
-    gameOver: false,
-    winner: null
+    round: freshRound(1),
+    score1: 0,
+    score2: 0,
+    starter: 1
   };
 }
 
@@ -373,9 +350,15 @@ function handleData(data){
   if(data.type === 'init'){
     state = data.state;
     startGame();
-  } else if(data.type === 'call'){
-    if(state && !state.marked.includes(data.num)){
-      applyCall(data.num);
+  } else if(data.type === 'move'){
+    if(state && !state.round.gameOver && state.round.board[data.index] === null){
+      applyMove(data.index);
+      render();
+    }
+  } else if(data.type === 'rematch'){
+    if(state){
+      state.starter = state.starter === 1 ? 2 : 1;
+      state.round = freshRound(state.starter);
       render();
     }
   }
@@ -385,130 +368,141 @@ function handleData(data){
 function startGame(){
   document.getElementById('lobbyCard').style.display = 'none';
   document.getElementById('gameScreen').style.display = 'flex';
-  document.getElementById('meTag').textContent = 'تو بازیکن ' + (myRole===1?'۱':'۲') + ' هستی';
-  document.getElementById('myTag').className = 'player-tag ' + (myRole===1?'p1':'p2');
-  document.getElementById('myTag').textContent = 'بازیکن ' + (myRole===1?'۱':'۲') + ' (تو)';
+  document.getElementById('meTag').textContent = 'تو بازیکن ' + (myRole===1?'۱ (X)':'۲ (O)') + ' هستی';
+  document.getElementById('oppNote').textContent = 'حریفت روی گوشی خودش همین صفحه رو می‌بینه.';
   render();
 }
 
-function myArr(){ return myRole===1 ? state.arr1 : state.arr2; }
-function myAwarded(){ return myRole===1 ? state.awarded1 : state.awarded2; }
-function myBingo(){ return myRole===1 ? state.bingo1 : state.bingo2; }
-
 function render(){
   if(!state) return;
-  renderGrid();
-  renderBingoCount();
-  renderNumpad();
+  renderBoard();
+  renderScoreboard();
   renderStatus();
-  if(state.gameOver){
-    document.getElementById('winTitle').textContent = '🎉 بازیکن ' + (state.winner===1?'۱':'۲') + ' برنده شد!' + (state.winner===myRole ? ' (خودت!)' : '');
+  const r = state.round;
+  const rematchBtn = document.getElementById('rematchBtn');
+  if(r.gameOver){
+    rematchBtn.style.display = 'inline-block';
+    let title, sub;
+    if(r.winner === 'draw'){
+      title = '🤝 مساوی شد!';
+      sub = 'هیچ‌کس این دور رو نبرد.';
+    } else {
+      title = '🎉 بازیکن ' + (r.winner===1?'۱ (X)':'۲ (O)') + ' برنده شد!' + (r.winner===myRole ? ' (خودت!)' : '');
+      sub = 'سه‌تا پشت‌سرهم رد کرد.';
+    }
+    document.getElementById('winTitle').textContent = title;
+    document.getElementById('winSub').textContent = sub;
     document.getElementById('overlay').classList.add('show');
   } else {
+    rematchBtn.style.display = 'none';
     document.getElementById('overlay').classList.remove('show');
   }
 }
 
-function renderGrid(){
-  const el = document.getElementById('myGrid');
+function renderBoard(){
+  const el = document.getElementById('board');
   el.innerHTML = '';
-  const arr = myArr();
-  const marked = new Set(state.marked);
-  const won = new Set(myAwarded());
-  const wonCells = new Set();
-  won.forEach(li => LINES[li].forEach(idx => wonCells.add(idx)));
-  const markClass = myRole===1 ? 'mark-p1' : 'mark-p2';
-  arr.forEach((num, idx) => {
+  const r = state.round;
+  const myTurn = r.turn === myRole && !r.gameOver;
+  const winSet = new Set(r.winLine || []);
+  r.board.forEach((val, idx) => {
     const cell = document.createElement('div');
-    cell.className = 'cell' + (marked.has(num) ? ' marked' : '') + (wonCells.has(idx) ? ' won-line' : '');
-    cell.textContent = num;
-    if(marked.has(num)){
-      const mark = document.createElement('div');
-      mark.className = markClass;
+    const canClick = myTurn && val === null;
+    cell.className = 'ttt-cell'
+      + (val === 1 ? ' x' : val === 2 ? ' o' : '')
+      + (canClick ? ' clickable' : '')
+      + (winSet.has(idx) ? ' win' : '');
+    if(val !== null){
+      const mark = document.createElement('span');
+      mark.className = 'mark';
+      mark.textContent = val === 1 ? '✕' : '○';
       cell.appendChild(mark);
+    }
+    if(canClick){
+      cell.onclick = () => makeMove(idx);
     }
     el.appendChild(cell);
   });
 }
 
-function renderBingoCount(){
-  const el = document.getElementById('myBingo');
+function renderScoreboard(){
+  const el = document.getElementById('scoreboard');
   el.innerHTML = '';
-  const cls = myRole===1 ? 'p1' : 'p2';
-  for(let i=0;i<WIN_TARGET;i++){
-    const s = document.createElement('span');
-    if(i < myBingo()) s.classList.add('filled', cls);
-    el.appendChild(s);
-  }
-}
-
-function renderNumpad(){
-  const el = document.getElementById('numpad');
-  el.innerHTML = '';
-  const marked = new Set(state.marked);
-  const myTurn = state.turn === myRole && !state.gameOver;
-  const sorted = state.numbers.slice().sort((a,b)=>a-b);
-  sorted.forEach(num => {
-    const btn = document.createElement('button');
-    btn.className = 'num-btn';
-    btn.textContent = num;
-    btn.disabled = marked.has(num) || !myTurn;
-    btn.onclick = () => callNumber(num);
-    el.appendChild(btn);
+  [1,2].forEach(role => {
+    const chip = document.createElement('div');
+    chip.className = 'score-chip ' + (role===1?'p1':'p2') + (role===myRole?' me':'');
+    const label = document.createElement('span');
+    label.className = 'label';
+    label.textContent = 'بازیکن ' + (role===1?'۱ (X)':'۲ (O)') + (role===myRole?' (تو)':'');
+    const num = document.createElement('span');
+    num.className = 'num';
+    num.textContent = role===1 ? state.score1 : state.score2;
+    chip.appendChild(label);
+    chip.appendChild(num);
+    el.appendChild(chip);
   });
 }
 
 function renderStatus(){
   const bar = document.getElementById('statusBar');
   const text = document.getElementById('statusText');
-  bar.className = 'status ' + (state.turn===1 ? 'turn-p1' : 'turn-p2');
-  if(state.gameOver){
-    text.textContent = 'بازی تمام شد';
-  } else if(state.turn === myRole){
-    text.textContent = 'نوبت توئه!';
+  const r = state.round;
+  bar.className = 'status ' + (r.turn===1 ? 'turn-p1' : 'turn-p2');
+  if(r.gameOver){
+    text.textContent = 'این دور تمام شد';
+  } else if(r.turn === myRole){
+    text.textContent = 'نوبت توئه! یه خونه رو لمس کن';
   } else {
-    text.textContent = 'منتظر بازیکن ' + (state.turn===1?'۱':'۲') + '...';
+    text.textContent = 'منتظر بازیکن ' + (r.turn===1?'۱':'۲') + '...';
   }
 }
 
-function checkLines(arr, awardedArr){
-  const awardedSet = new Set(awardedArr);
-  const markedSet = new Set(state.marked);
-  let newlyWon = 0;
-  LINES.forEach((line, li) => {
-    if(awardedSet.has(li)) return;
-    const complete = line.every(idx => markedSet.has(arr[idx]));
-    if(complete){ awardedSet.add(li); newlyWon++; }
-  });
-  return { newlyWon, awarded: Array.from(awardedSet) };
+function checkWinner(board){
+  for(const line of WIN_LINES){
+    const [a,b,c] = line;
+    if(board[a] !== null && board[a] === board[b] && board[b] === board[c]){
+      return { winner: board[a], line };
+    }
+  }
+  if(board.every(v => v !== null)) return { winner: 'draw', line: null };
+  return null;
 }
 
-function applyCall(num){
-  state.marked.push(num);
-  const r1 = checkLines(state.arr1, state.awarded1);
-  const r2 = checkLines(state.arr2, state.awarded2);
-  state.awarded1 = r1.awarded;
-  state.awarded2 = r2.awarded;
-  state.bingo1 += r1.newlyWon;
-  state.bingo2 += r2.newlyWon;
-  if(state.bingo1 >= WIN_TARGET || state.bingo2 >= WIN_TARGET){
-    state.gameOver = true;
-    state.winner = state.bingo1 >= WIN_TARGET ? 1 : 2;
+function applyMove(index){
+  const r = state.round;
+  r.board[index] = r.turn;
+  const result = checkWinner(r.board);
+  if(result){
+    r.gameOver = true;
+    r.winner = result.winner;
+    r.winLine = result.line;
+    if(result.winner === 1) state.score1++;
+    else if(result.winner === 2) state.score2++;
   } else {
-    state.turn = state.turn === 1 ? 2 : 1;
+    r.turn = r.turn === 1 ? 2 : 1;
   }
 }
 
-function callNumber(num){
-  if(!state || state.gameOver || state.turn !== myRole) return;
-  if(state.marked.includes(num)) return;
-  applyCall(num);
+function makeMove(index){
+  const r = state.round;
+  if(!state || r.gameOver || r.turn !== myRole) return;
+  if(r.board[index] !== null) return;
+  applyMove(index);
   render();
-  conn.send({ type:'call', num });
+  conn.send({ type:'move', index });
 }
 
+function rematch(){
+  if(!state) return;
+  state.starter = state.starter === 1 ? 2 : 1;
+  state.round = freshRound(state.starter);
+  render();
+  conn.send({ type:'rematch' });
+}
+
+document.getElementById('rematchBtn').onclick = rematch;
+document.getElementById('playAgainBtn').onclick = rematch;
 document.getElementById('restartBtn').onclick = () => location.href = location.pathname;
-document.getElementById('playAgainBtn').onclick = () => location.href = location.pathname;
 </script>
 </body>
-</html>
+  </html>
